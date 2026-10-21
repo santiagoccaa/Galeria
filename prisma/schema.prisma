@@ -1,0 +1,83 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Articles {
+  id String @id @unique()
+
+  name        String
+  description String
+
+  price Int
+  stock Int
+
+  imageUrl String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId String
+
+  normalizedName String
+  userId         String
+  purchasesUsers PurchasesUser[]
+  orders         Orders[]
+}
+
+model Category {
+  id   String @id @unique
+  name String
+
+  articles Articles[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PurchasesUser {
+  id String @id @default(uuid())
+
+  productName String
+  price       Float
+  quantity    Int
+
+  articleId String
+  article   Articles @relation(fields: [articleId], references: [id])
+
+  userId String
+
+  mercadoPagoPaymentId String @unique()
+
+  createdAt DateTime @default(now())
+
+  @@index([articleId])
+  @@index([userId])
+}
+
+model Orders {
+  id String @id @default(uuid())
+
+  userId   String
+  quantity Int
+
+  productName String
+  unitPrice   Float
+  status      Status
+
+  expiresAt DateTime
+
+  mercadoPagoPaymentId String @unique()
+
+  articles   Articles @relation(fields: [articlesId], references: [id])
+  articlesId String
+}
+
+enum Status {
+  RESERVED
+  PAYD
+}
